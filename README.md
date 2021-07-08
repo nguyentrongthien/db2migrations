@@ -6,6 +6,7 @@ A very simple package that generate migration files from a given database.
 
 - Create migrations for tables that don't already have one.
 - Read column's properties and write appropriate Eloquent statements.
+- Add newly generated migrations into migrations table with latest batch number.
 
 ## Possible Limitations
 

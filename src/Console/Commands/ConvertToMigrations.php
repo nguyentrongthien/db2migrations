@@ -59,14 +59,14 @@ class ConvertToMigrations extends BaseCommand {
 
         $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
 
-        $count = 0;
+        $files = [];
         foreach ($tables as $table) {
             if(!in_array($table, $this->excludedTables)) {
-                $this->writeMigration($table);
-                $count++;
+                $files[] = $this->writeMigration($table);
             }
-            if($count == 1) break;
         }
+
+        $this->markMigrationAsRan($files);
     }
 
     /**
@@ -97,15 +97,38 @@ class ConvertToMigrations extends BaseCommand {
      * Write the migration file to disk.
      *
      * @param string $tableName
-     * @return void
+     * @return string
      * @throws FileNotFoundException
      */
-    protected function writeMigration(string $tableName)
+    protected function writeMigration(string $tableName): string
     {
         $file = pathinfo($this->generator->create(
             $tableName, $this->getMigrationPath()), PATHINFO_FILENAME);
 
         $this->line("<info>Created Migration:</info> {$file}");
+
+        return $file;
+    }
+
+    protected function markMigrationAsRan(array $migrations)
+    {
+        $this->info(sizeof($migrations) . ' migration files have been generated.');
+        if (!$this->confirm('Would you like to add these files into migrations table and mark as ran?') || sizeof($migrations) <= 0) {
+            return;
+        }
+
+        $lastBatch = intval($this->migrator->getRepository()->getLast()[0]->batch);
+
+        $insert = array_map(function ($value) use ($lastBatch) {
+            return [
+                'migration' => $value,
+                'batch' => $lastBatch + 1
+            ];
+        }, $migrations);
+
+        DB::table('migrations')->insert($insert);
+
+        $this->info(sizeof($migrations) . ' files added to migrations table with batch number ' . ($lastBatch + 1));
     }
 
     /**
