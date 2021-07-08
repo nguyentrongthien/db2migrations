@@ -1,0 +1,26 @@
+{
+    "name": "tim-nguyen/db2migrations",
+    "description": "A package to convert tables from database to migration files.",
+    "type": "laravel-package",
+    "autoload": {
+        "psr-4": {
+            "Laravel\\MigrationFromDatabase\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tim Nguyen",
+            "email": "nguyentrongthien1994@gmail.com"
+        }
+    ],
+    "require": {
+        "doctrine/dbal": "2.12.1"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Laravel\\MigrationFromDatabase\\Providers\\MigrationFromDatabaseServiceProvider"
+            ]
+        }
+    }
+}
