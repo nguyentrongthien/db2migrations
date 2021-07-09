@@ -16,7 +16,8 @@ class ConvertToMigrations extends BaseCommand {
      */
     protected $signature = 'migrate:convert
         {--path= : The location where the migration file should be created}
-        {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}';
+        {--realpath : Indicate any provided migration file paths are pre-resolved absolute paths}
+        {--prefix= : Include only table with this prefix}';
 
     /**
      * The console command description.
@@ -61,12 +62,29 @@ class ConvertToMigrations extends BaseCommand {
 
         $files = [];
         foreach ($tables as $table) {
-            if(!in_array($table, $this->excludedTables)) {
+            if($this->isTableEligible($table)) {
                 $files[] = $this->writeMigration($table);
             }
         }
 
         $this->markMigrationAsRan($files);
+    }
+
+    /**
+     * Check if a given table should have a migration generated for.
+     *
+     * @param string $table
+     * @return bool
+     */
+    protected function isTableEligible(string $table): bool
+    {
+        if(in_array($table, $this->excludedTables))
+            return false;
+
+        if(! is_null($prefix = $this->input->getOption('prefix')))
+            return strpos($table, $prefix) === 0;
+
+        return true;
     }
 
     /**
@@ -84,7 +102,6 @@ class ConvertToMigrations extends BaseCommand {
                 if (strpos($line, 'Schema::create') !== false) {
                     $arr = explode('\'', $line);
                     if(sizeof($arr) >= 2) {
-                        $this->info($arr[1]);
                         $this->excludedTables[] = $arr[1];
                         break;
                     }
@@ -128,7 +145,7 @@ class ConvertToMigrations extends BaseCommand {
 
         DB::table('migrations')->insert($insert);
 
-        $this->info(sizeof($migrations) . ' files added to migrations table with batch number ' . ($lastBatch + 1));
+        $this->info(sizeof($migrations) . ' files added to migrations table with batch number ' . ($lastBatch + 1) .'.');
     }
 
     /**

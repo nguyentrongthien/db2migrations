@@ -6,11 +6,15 @@ A very simple package that generate migration files from a given database.
 
 - Create migrations for tables that don't already have one.
 - Read column's properties and write appropriate Eloquent statements.
-- Add newly generated migrations into migrations table with latest batch number.
+- Option to scan only for tables with a given prefix.
+- Add newly generated migrations into migrations table with the latest batch number.
 
 ## Possible Limitations
 
-This package is written and tested only against MySQL database for the time being. This might or might not work with other database systems like Postgres.
+This package is written and tested only against MySQL database for the time being.
+This might or might not work with other database systems like Postgres.
+There might be a problem if the db user provided is too restricted because this package also scan
+information_schema table for column's properties.
 
 ## Field Types
 
